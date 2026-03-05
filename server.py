@@ -104,10 +104,11 @@ class Handler(SimpleHTTPRequestHandler):
 
         # ── Final batch: encode .MOV with FFmpeg qtrle (Animation) + alpha ──
         out_path = os.path.join(tmp, 'output.mov')
+        ffmpeg_cmd = os.path.join(DIR, 'ffmpeg')
         
         # qtrle encodes almost instantly and compresses flat UI graphics beautifully
         cmd =[
-            'ffmpeg', '-y',
+            ffmpeg_cmd, '-y',
             '-framerate', str(fps),
             '-i', os.path.join(tmp, 'frame_%04d.png'),
             '-c:v', 'qtrle',
@@ -129,7 +130,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_response(500)
             self.send_header('Content-Type', 'text/plain')
             self.end_headers()
-            self.wfile.write(b'FFmpeg not found. Install: brew install ffmpeg')
+            self.wfile.write(b'Local FFmpeg binary not found. Please ensure it is bundled.')
             return
         except subprocess.TimeoutExpired:
             self.send_response(500)
