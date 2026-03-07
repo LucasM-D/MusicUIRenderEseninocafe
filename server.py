@@ -21,7 +21,7 @@ from http.server import HTTPServer, SimpleHTTPRequestHandler
 from pathlib import Path
 import webbrowser
 
-PORT = 8000
+PORT = int(os.environ.get("PORT", 8000))
 DIR = Path(__file__).parent
 
 # Store in-progress render sessions
@@ -104,7 +104,10 @@ class Handler(SimpleHTTPRequestHandler):
 
         # ── Final batch: encode .MOV with FFmpeg qtrle (Animation) + alpha ──
         out_path = os.path.join(tmp, 'output.mov')
-        ffmpeg_cmd = os.path.join(DIR, 'ffmpeg')
+        
+        # Check if local ffmpeg exists, otherwise rely on system ffmpeg
+        local_ffmpeg = os.path.join(DIR, 'ffmpeg')
+        ffmpeg_cmd = local_ffmpeg if os.path.exists(local_ffmpeg) else 'ffmpeg'
         
         # qtrle encodes almost instantly and compresses flat UI graphics beautifully
         cmd =[
@@ -130,7 +133,7 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_response(500)
             self.send_header('Content-Type', 'text/plain')
             self.end_headers()
-            self.wfile.write(b'Local FFmpeg binary not found. Please ensure it is bundled.')
+            self.wfile.write(b'FFmpeg binary not found. Please ensure it is bundled or installed on the system.')
             return
         except subprocess.TimeoutExpired:
             self.send_response(500)
@@ -161,7 +164,12 @@ if __name__ == '__main__':
     print(f'  Server running at http://localhost:{PORT}')
     print(f'  Press Ctrl+C to stop\n')
 
-    webbrowser.open(f'http://localhost:{PORT}')
+    # Avoid opening a browser in cloud environments like Render or Heroku
+    if not os.environ.get('RENDER') and not os.environ.get('DYNO'):
+        try:
+            webbrowser.open(f'http://localhost:{PORT}')
+        except:
+            pass
 
     try:
         HTTPServer(('', PORT), Handler).serve_forever()
