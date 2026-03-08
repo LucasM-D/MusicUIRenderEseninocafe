@@ -498,61 +498,59 @@ async function exportMOV() {
   const overlay = showStatus('Rendering frames…');
   stopLoop();
 
-  const BATCH = 25;
-  const sessionId = Date.now().toString();
-
-  let framesBuffer = [];
-  let sentCount = 0;
-
+  const frames = [];
   for (let f = 0; f < totalFrames; f++) {
     const timeMs = f * frameDt;
     const introMs = state.useAnim ? timeMs : Infinity;
     render(introMs, timeMs / 1000, true); // Pass true to use exportScale
-    framesBuffer.push(canvas.toDataURL('image/png'));
+    frames.push(canvas.toDataURL('image/png'));
 
-    // Update progress
-    if (f % 5 === 0) {
+    if (f % 15 === 0) {
       overlay.querySelector('p').textContent =
-        `Rendering & Uploading ${f + 1} / ${totalFrames}…`;
+        `Rendering frame ${f + 1} / ${totalFrames}…`;
       await new Promise(r => setTimeout(r, 0));
     }
+  }
 
-    // Send batch when buffer is full
-    if (framesBuffer.length === BATCH || f === totalFrames - 1) {
-      const isFinal = f === totalFrames - 1;
-      const res = await fetch('/render', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          session: sessionId,
-          startIndex: sentCount,
-          frames: framesBuffer,
-          fps: CFG.fps,
-          totalFrames,
-          final: isFinal,
-        }),
-      });
+  overlay.querySelector('p').textContent = 'Sending to server…';
+  await new Promise(r => setTimeout(r, 0));
 
-      if (!res.ok) {
-        alert('Server error: ' + (await res.text()));
-        hideStatus();
-        syncCanvasSize(false);
-        startLoop();
-        return;
-      }
+  const BATCH = 25;
+  const sessionId = Date.now().toString();
 
-      if (isFinal) {
-        overlay.querySelector('p').textContent = 'Encoding .mov…';
-        const blob = await res.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `music-ui-${state.title.replace(/\s+/g, '-').toLowerCase()}.mov`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      }
+  for (let i = 0; i < frames.length; i += BATCH) {
+    const batch = frames.slice(i, i + BATCH);
+    const res = await fetch('/render', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        session: sessionId,
+        startIndex: i,
+        frames: batch,
+        fps: CFG.fps,
+        totalFrames,
+        final: (i + BATCH) >= frames.length,
+      }),
+    });
 
-      sentCount += framesBuffer.length;
-      framesBuffer = []; // Clear buffer for next batch
+    if (!res.ok) {
+      alert('Server error: ' + (await res.text()));
+      hideStatus();
+      startLoop();
+      return;
+    }
+
+    if ((i + BATCH) >= frames.length) {
+      overlay.querySelector('p').textContent = 'Encoding .mov…';
+      const blob = await res.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `music-ui-${state.title.replace(/\s+/g, '-').toLowerCase()}.mov`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } else {
+      overlay.querySelector('p').textContent =
+        `Uploading frames ${i + 1}–${Math.min(i + BATCH, frames.length)} / ${frames.length}…`;
     }
   }
 
