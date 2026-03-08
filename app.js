@@ -10,7 +10,8 @@ const CFG = {
   textGap: 12, rightPad: 27,
   cornerRadius: 22, strokeWidth: 8, padding: 40, // More padding for noise "breathing" room
   minWidth: 300,
-  scale: 2,
+  uiScale: 2,           // Visual sharpness in the browser
+  exportScale: 1.25,    // Actual resolution parameter for the .MOV file
 
   // Cavalry Rectangle Shape Divisions (Lowered for smoother interpolation)
   divW: 240,
@@ -308,15 +309,19 @@ function measureContainerW() {
   return Math.max(TEXT_X + Math.max(tw, aw, adw) + CFG.rightPad, CFG.minWidth);
 }
 
-function syncCanvasSize() {
+function syncCanvasSize(isExporting = false) {
   const w = Math.ceil(measureContainerW());
-  const S = CFG.scale;
-  if (Math.abs(w - containerW) > 1) {
+  const S = isExporting ? CFG.exportScale : CFG.uiScale;
+
+  if (Math.abs(w - containerW) > 1 || canvas.dataset.currentScale != S) {
     containerW = w;
-    canvas.width = (containerW + CFG.padding * 2) * S;
-    canvas.height = (CONTAINER_H + CFG.padding * 2) * S;
+    canvas.width = Math.floor((containerW + CFG.padding * 2) * S);
+    canvas.height = Math.floor((CONTAINER_H + CFG.padding * 2) * S);
+
+    // Always keep the CSS visual size identical, no matter what internal resolution is rendering
     canvas.style.width = (containerW + CFG.padding * 2) + 'px';
     canvas.style.height = (CONTAINER_H + CFG.padding * 2) + 'px';
+    canvas.dataset.currentScale = S;
   }
 }
 
@@ -328,9 +333,9 @@ function rrPath(c, x, y, w, h, r) {
   c.closePath();
 }
 
-function render(introMs, noiseT) {
-  syncCanvasSize();
-  const S = CFG.scale;
+function render(introMs, noiseT, isExporting = false) {
+  syncCanvasSize(isExporting);
+  const S = isExporting ? CFG.exportScale : CFG.uiScale;
   const P = CFG.padding;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -497,7 +502,7 @@ async function exportMOV() {
   for (let f = 0; f < totalFrames; f++) {
     const timeMs = f * frameDt;
     const introMs = state.useAnim ? timeMs : Infinity;
-    render(introMs, timeMs / 1000);
+    render(introMs, timeMs / 1000, true); // Pass true to use exportScale
     frames.push(canvas.toDataURL('image/png'));
 
     if (f % 15 === 0) {
@@ -550,6 +555,7 @@ async function exportMOV() {
   }
 
   hideStatus();
+  syncCanvasSize(false); // Snap back to UI scale
   startLoop();
 }
 
