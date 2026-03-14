@@ -33,12 +33,6 @@ class Handler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=str(DIR), **kwargs)
 
-    def do_GET(self):
-        if self.path == '/idle-animations':
-            self._handle_list_idle_animations()
-        else:
-            super().do_GET()
-
     def do_POST(self):
         if self.path == '/render':
             self._handle_render()
@@ -46,18 +40,6 @@ class Handler(SimpleHTTPRequestHandler):
             self._handle_spotify_info()
         else:
             self.send_error(404)
-
-    def _handle_list_idle_animations(self):
-        idle_dir = DIR / 'idle-animations'
-        files = []
-        if idle_dir.is_dir():
-            for f in sorted(idle_dir.iterdir()):
-                if f.is_file() and not f.name.startswith('.'):
-                    files.append(f.name)
-        self.send_response(200)
-        self.send_header('Content-Type', 'application/json')
-        self.end_headers()
-        self.wfile.write(json.dumps(files).encode())
 
     def _handle_spotify_info(self):
         content_len = int(self.headers.get('Content-Length', 0))
