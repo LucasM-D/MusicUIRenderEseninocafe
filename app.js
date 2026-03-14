@@ -101,8 +101,6 @@ const animToggle = document.getElementById('animToggle');
 const previewBtn = document.getElementById('previewBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const extraToggle = document.getElementById('extraToggle');
-const idleAnimToggle = document.getElementById('idleAnimToggle');
-const idleAnimationsContainer = document.getElementById('idleAnimationsContainer');
 
 async function handleSpotifyAutofill(urlOrQuery) {
   if (!urlOrQuery) return;
@@ -596,39 +594,91 @@ previewBtn.addEventListener('click', playIntro);
 extraToggle.addEventListener('change', () => { state.extraStyling = extraToggle.checked; });
 downloadBtn.addEventListener('click', exportMOV);
 
-// ── IDLE ANIMATIONS TAB ──
+// ══════════════════════════════════
+// IDLE ANIMATIONS SECTION
+// ══════════════════════════════════
+
+const idleAnimSection = document.getElementById('idleAnimSection');
+const idleAnimToggle = document.getElementById('idleAnimToggle');
+const idleAnimList = document.getElementById('idleAnimList');
+
 idleAnimToggle.addEventListener('click', () => {
-  idleAnimToggle.parentElement.classList.toggle('open');
+  idleAnimSection.classList.toggle('open');
 });
 
 async function loadIdleAnimations() {
   try {
-    const res = await fetch('/idle-animations-list');
-    if (!res.ok) throw new Error('Failed to fetch idle animations');
+    const res = await fetch('/idle-animations');
+    if (!res.ok) throw new Error('Failed to fetch');
     const files = await res.json();
-    
+
     if (files.length === 0) {
-      idleAnimationsContainer.innerHTML = '<p class="hint" style="text-align:center; padding: 10px 0;">No animations found.</p>';
+      idleAnimList.innerHTML = '<p class="hint" style="padding:8px 0">No animations found.</p>';
       return;
     }
 
-    idleAnimationsContainer.innerHTML = files.map(filename => `
-      <div class="idle-anim-item">
-        <span class="idle-anim-name" title="${filename}">${filename}</span>
-        <div class="idle-anim-actions">
-          <button class="btn btn-secondary" onclick="window.open('/idle-animations/${filename}', '_blank')">Play</button>
-          <a class="btn btn-primary" href="/idle-animations/${filename}" download="${filename}">Download</a>
-        </div>
-      </div>
-    `).join('');
+    idleAnimList.innerHTML = '';
+    files.forEach(name => {
+      const item = document.createElement('div');
+      item.className = 'idle-anim-item';
+
+      const video = document.createElement('video');
+      video.src = `idle-animations/${encodeURIComponent(name)}`;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+
+      const meta = document.createElement('div');
+      meta.className = 'idle-anim-meta';
+
+      const label = document.createElement('span');
+      label.className = 'idle-anim-name';
+      label.textContent = name.replace(/\.[^.]+$/, '');
+      label.title = name;
+
+      const actions = document.createElement('div');
+      actions.className = 'idle-anim-actions';
+
+      // Play / Pause button
+      const playBtn = document.createElement('button');
+      playBtn.title = 'Play / Pause';
+      playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+      playBtn.addEventListener('click', () => {
+        if (video.paused) {
+          video.play();
+          playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        } else {
+          video.pause();
+          playBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        }
+      });
+
+      // Download button
+      const dlBtn = document.createElement('button');
+      dlBtn.title = 'Download';
+      dlBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      dlBtn.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = `idle-animations/${encodeURIComponent(name)}`;
+        a.download = name;
+        a.click();
+      });
+
+      actions.appendChild(playBtn);
+      actions.appendChild(dlBtn);
+      meta.appendChild(label);
+      meta.appendChild(actions);
+      item.appendChild(video);
+      item.appendChild(meta);
+      idleAnimList.appendChild(item);
+    });
   } catch (err) {
-    console.error(err);
-    idleAnimationsContainer.innerHTML = '<p class="hint" style="text-align:center; color:#ff4444;">Error loading animations.</p>';
+    console.error('Failed to load idle animations:', err);
+    idleAnimList.innerHTML = '<p class="hint" style="padding:8px 0">Failed to load.</p>';
   }
 }
 
-document.fonts.ready.then(() => { 
-  syncCanvasSize(); 
-  startLoop(); 
-  loadIdleAnimations();
-});
+loadIdleAnimations();
+
+document.fonts.ready.then(() => { syncCanvasSize(); startLoop(); });

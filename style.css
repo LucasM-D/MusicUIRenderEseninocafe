@@ -361,87 +361,114 @@ body {
   }
 }
 
-/* ── Accordion ── */
-.accordion {
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface-2);
-  overflow: hidden;
+/* ── Collapsible Section ── */
+.collapsible-section {
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+  padding-top: 4px;
 }
 
-.accordion-header {
-  width: 100%;
+.collapsible-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 12px 14px;
-  background: transparent;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
   border: none;
-  color: var(--text);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.accordion-header:hover {
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.accordion-header .chevron {
-  transition: transform 0.3s ease;
   color: var(--text-muted);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: color 0.2s;
 }
 
-.accordion.open .accordion-header .chevron {
+.collapsible-header:hover {
+  color: var(--text);
+}
+
+.collapsible-chevron {
+  transition: transform 0.25s ease;
+}
+
+.collapsible-section.open .collapsible-chevron {
   transform: rotate(180deg);
 }
 
-.accordion-content {
+.collapsible-body {
   max-height: 0;
   overflow: hidden;
-  transition: max-height 0.3s ease, padding 0.3s ease;
-  background: rgba(0, 0, 0, 0.2);
+  transition: max-height 0.3s ease;
 }
 
-.accordion.open .accordion-content {
-  max-height: 500px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--border);
-  overflow-y: auto;
+.collapsible-section.open .collapsible-body {
+  max-height: 600px;
 }
 
 /* ── Idle Animation Items ── */
+.idle-anim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 6px;
+}
+
 .idle-anim-item {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.idle-anim-item video {
+  width: 100%;
+  display: block;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: #000;
+}
+
+.idle-anim-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.idle-anim-item:last-child {
-  border-bottom: none;
-  padding-bottom: 0;
-}
-
-.idle-anim-item:first-child {
-  padding-top: 0;
+  padding: 6px 10px;
+  gap: 6px;
 }
 
 .idle-anim-name {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 140px;
+  flex: 1;
+  min-width: 0;
 }
 
 .idle-anim-actions {
   display: flex;
-  gap: 6px;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
-.idle-anim-actions .btn {
-  padding: 6px 10px;
-  font-size: 11px;
+.idle-anim-actions button {
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
+  color: var(--text-muted);
+  border-radius: 4px;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.idle-anim-actions button:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: var(--text);
 }
