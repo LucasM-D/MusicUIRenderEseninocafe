@@ -63,10 +63,10 @@ let loopStart = null;
 let introActive = false;
 
 const state = {
-  title: 'Title',
-  artist: 'Artist',
-  album: 'Album Title',
-  duration: 'x:xx',
+  title: 'Big Iron',
+  artist: 'Marty Robbins',
+  album: 'Gunfighter Ballads And Trail Songs',
+  duration: '3:55',
   useAnim: false,
   extraStyling: false,
 };
