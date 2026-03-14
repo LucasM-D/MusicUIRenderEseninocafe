@@ -84,15 +84,15 @@ class Handler(SimpleHTTPRequestHandler):
             sessions[session_id] = tmp
         tmp = sessions[session_id]
 
-        # Save PNG frames
+        # Save WebP frames
         for i, data_url in enumerate(frames):
             idx = start_idx + i
-            # Strip data:image/png;base64, prefix
+            # Strip data:image/webp;base64, prefix
             header, b64 = data_url.split(',', 1)
-            png_bytes = base64.b64decode(b64)
-            frame_path = os.path.join(tmp, f'frame_{idx:04d}.png')
+            frame_bytes = base64.b64decode(b64)
+            frame_path = os.path.join(tmp, f'frame_{idx:04d}.webp')
             with open(frame_path, 'wb') as f:
-                f.write(png_bytes)
+                f.write(frame_bytes)
 
         if not is_final:
             # Acknowledge batch, wait for more
@@ -113,7 +113,7 @@ class Handler(SimpleHTTPRequestHandler):
         cmd =[
             ffmpeg_cmd, '-y',
             '-framerate', str(fps),
-            '-i', os.path.join(tmp, 'frame_%04d.png'),
+            '-i', os.path.join(tmp, 'frame_%04d.webp'),
             '-c:v', 'qtrle',
             '-pix_fmt', 'argb',
             out_path,
