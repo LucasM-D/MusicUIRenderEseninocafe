@@ -101,6 +101,8 @@ const animToggle = document.getElementById('animToggle');
 const previewBtn = document.getElementById('previewBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const extraToggle = document.getElementById('extraToggle');
+const idleAnimToggle = document.getElementById('idleAnimToggle');
+const idleAnimationsContainer = document.getElementById('idleAnimationsContainer');
 
 async function handleSpotifyAutofill(urlOrQuery) {
   if (!urlOrQuery) return;
@@ -594,4 +596,39 @@ previewBtn.addEventListener('click', playIntro);
 extraToggle.addEventListener('change', () => { state.extraStyling = extraToggle.checked; });
 downloadBtn.addEventListener('click', exportMOV);
 
-document.fonts.ready.then(() => { syncCanvasSize(); startLoop(); });
+// ── IDLE ANIMATIONS TAB ──
+idleAnimToggle.addEventListener('click', () => {
+  idleAnimToggle.parentElement.classList.toggle('open');
+});
+
+async function loadIdleAnimations() {
+  try {
+    const res = await fetch('/idle-animations-list');
+    if (!res.ok) throw new Error('Failed to fetch idle animations');
+    const files = await res.json();
+    
+    if (files.length === 0) {
+      idleAnimationsContainer.innerHTML = '<p class="hint" style="text-align:center; padding: 10px 0;">No animations found.</p>';
+      return;
+    }
+
+    idleAnimationsContainer.innerHTML = files.map(filename => `
+      <div class="idle-anim-item">
+        <span class="idle-anim-name" title="${filename}">${filename}</span>
+        <div class="idle-anim-actions">
+          <button class="btn btn-secondary" onclick="window.open('/idle-animations/${filename}', '_blank')">Play</button>
+          <a class="btn btn-primary" href="/idle-animations/${filename}" download="${filename}">Download</a>
+        </div>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+    idleAnimationsContainer.innerHTML = '<p class="hint" style="text-align:center; color:#ff4444;">Error loading animations.</p>';
+  }
+}
+
+document.fonts.ready.then(() => { 
+  syncCanvasSize(); 
+  startLoop(); 
+  loadIdleAnimations();
+});

@@ -38,8 +38,21 @@ class Handler(SimpleHTTPRequestHandler):
             self._handle_render()
         elif self.path == '/spotify-info':
             self._handle_spotify_info()
+        elif self.path == '/idle-animations-list':
+            self._handle_idle_animations()
         else:
             self.send_error(404)
+
+    def _handle_idle_animations(self):
+        animations_dir = DIR / "idle-animations"
+        files = []
+        if animations_dir.exists() and animations_dir.is_dir():
+            files = [f.name for f in animations_dir.iterdir() if f.is_file() and f.suffix.lower() == '.mp4']
+
+        self.send_response(200)
+        self.send_header('Content-Type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(files).encode())
 
     def _handle_spotify_info(self):
         content_len = int(self.headers.get('Content-Length', 0))
