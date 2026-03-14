@@ -57,10 +57,10 @@ let loopStart = null;
 let introActive = false;
 
 const state = {
-  title: '',
-  artist: '',
-  album: '',
-  duration: '',
+  title: 'Title',
+  artist: 'Artist',
+  album: 'Album Title',
+  duration: 'x:xx',
   useAnim: false,
   extraStyling: false,
 };
@@ -301,10 +301,10 @@ function measureContainerW() {
   ctx.save();
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.font = 'bold 32px Helvetica, Arial, sans-serif';
-  const tw = ctx.measureText(state.title || 'Title').width;
+  const tw = ctx.measureText(state.title || ' ').width;
   ctx.font = '20px Helvetica, Arial, sans-serif';
-  const aw = ctx.measureText(state.album || 'Album Title').width;
-  const adw = ctx.measureText(`${state.artist || 'Artist'} - ${state.duration || 'x:xx'}`).width;
+  const aw = ctx.measureText(state.album || ' ').width;
+  const adw = ctx.measureText(`${state.artist} - ${state.duration}` || ' ').width;
   ctx.restore();
   return Math.max(TEXT_X + Math.max(tw, aw, adw) + CFG.rightPad, CFG.minWidth);
 }
@@ -393,22 +393,18 @@ function render(introMs, noiseT, isExporting = false) {
     ctx.textBaseline = 'top';
     ctx.font = 'bold 32px Helvetica, Arial, sans-serif';
 
-    const drawTitle = state.title || 'Title';
-    const drawAlbum = state.album || 'Album Title';
-    const drawArtist = state.artist || 'Artist';
-    const drawDuration = state.duration || 'x:xx';
-
     const hasAlbum = state.album && state.album.trim().length > 0;
 
     if (hasAlbum) {
-      ctx.fillText(drawTitle, TEXT_X, 26);
+      ctx.fillText(state.title, TEXT_X, 26);
       ctx.font = '20px Helvetica, Arial, sans-serif';
-      ctx.fillText(drawAlbum, TEXT_X, 66);
-      ctx.fillText(`${drawArtist} - ${drawDuration}`, TEXT_X, 90);
+      ctx.fillText(state.album, TEXT_X, 66);
+      ctx.fillText(`${state.artist} - ${state.duration}`, TEXT_X, 90);
     } else {
-      ctx.fillText(drawTitle, TEXT_X, 38);
+      // Centered more vertically and closer together
+      ctx.fillText(state.title, TEXT_X, 38);
       ctx.font = '20px Helvetica, Arial, sans-serif';
-      ctx.fillText(`${drawArtist} - ${drawDuration}`, TEXT_X, 78);
+      ctx.fillText(`${state.artist} - ${state.duration}`, TEXT_X, 78);
     }
   }
 
@@ -507,7 +503,7 @@ async function exportMOV() {
     const timeMs = f * frameDt;
     const introMs = state.useAnim ? timeMs : Infinity;
     render(introMs, timeMs / 1000, true); // Pass true to use exportScale
-    frames.push(canvas.toDataURL('image/webp', 0.95));
+    frames.push(canvas.toDataURL('image/png'));
 
     if (f % 15 === 0) {
       overlay.querySelector('p').textContent =
@@ -519,7 +515,7 @@ async function exportMOV() {
   overlay.querySelector('p').textContent = 'Sending to server…';
   await new Promise(r => setTimeout(r, 0));
 
-  const BATCH = 100;
+  const BATCH = 25;
   const sessionId = Date.now().toString();
 
   for (let i = 0; i < frames.length; i += BATCH) {
@@ -589,10 +585,10 @@ uploadZone.addEventListener('drop', e => {
   if (e.dataTransfer.files[0]) loadArt(e.dataTransfer.files[0]);
 });
 
-titleInput.addEventListener('input', () => { state.title = titleInput.value; });
-artistInput.addEventListener('input', () => { state.artist = artistInput.value; });
-albumInput.addEventListener('input', () => { state.album = albumInput.value; });
-durationInput.addEventListener('input', () => { state.duration = durationInput.value; });
+titleInput.addEventListener('input', () => { state.title = titleInput.value || titleInput.placeholder; });
+artistInput.addEventListener('input', () => { state.artist = artistInput.value || artistInput.placeholder; });
+albumInput.addEventListener('input', () => { state.album = albumInput.value || albumInput.placeholder; });
+durationInput.addEventListener('input', () => { state.duration = durationInput.value || durationInput.placeholder; });
 animToggle.addEventListener('change', () => { state.useAnim = animToggle.checked; });
 previewBtn.addEventListener('click', playIntro);
 extraToggle.addEventListener('change', () => { state.extraStyling = extraToggle.checked; });
