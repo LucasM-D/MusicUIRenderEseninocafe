@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            background: #181818;
+        }
+
+        #settings-container {
+            width: 600px;
+            min-width: 600px;
+            height: 100vh;
+            border: none;
+        }
+
+        #widget-container {
+            flex-grow: 1;
+            height: 100vh;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .content-container {
+            width: 50vw;
+            height: 100vh;
+            background-color: #f0f0f0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+
+    <iframe id="settings-container"></iframe>
+
+    <div id="widget-container">
+        <iframe id="widget"></iframe>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

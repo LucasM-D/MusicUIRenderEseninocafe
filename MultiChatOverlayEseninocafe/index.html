@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=502, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<title>Multichat Overlay</title>
+	<link rel="shortcut icon" href="#" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="./style.css" />
+	<script type="text/javascript" src="https://unpkg.com/@streamerbot/client/dist/streamerbot-client.js"></script>
+</head>
+
+<body>
+	<div id="statusContainer">Connecting...</div>
+	
+	<div id="mainContainer" class="slide-fade">
+		<ul id="messageList"></ul>
+		<div id="IPutThisHereSoICanCalculateHowBigEachMessageIsSupposedToBeBeforeIAddItToTheMessageList"></div>
+	</div>
+
+	<template id="messageTemplate">
+		<div id="messageContainer">
+			<div id="userInfo">
+				<span id="avatar"></span>
+				<span id="platform"></span>
+				<span id="username"></span> 
+				<span id="badgeList"></span>
+				<span id="timestamp"></span>
+				<span id="colon-separator" style="display: none;">: </span>
+			</div>
+
+			<div id="reply">
+				<div class="reply-row">
+					<img src="icons/reply-arrow.svg" id="replyArrow">
+					<span id="replyUser"></span>
+				</div>
+				<div class="reply-row">
+					<img src="icons/reply-line.svg" id="replyLine">
+					<span id="replyMsg"></span>
+				</div>
+			</div>
+
+			<span id="message"></span>
+		</div>
+	</template>
+
+	<template id="cardTemplate">
+		<div id="card">
+			<div id="header">
+				<span id="avatar"></span>
+				<span id="icon"></span>
+				<span id="title"></span>
+				<br id="line-space">
+			</div>
+			<span id="content"></span>
+		</div>
+	</template>
+
+	<template id="stickerTemplate">
+		<div id="sticker">
+			<div id="youtubeSuperSticker">
+				<div style="width: 100%; text-align: center;">
+					<img id="stickerImg">
+				</div>
+				<div id="stickerLabel"></div>
+			</div>
+		</div>
+	</template>
+
+	<template id="subCardTemplate">
+		<div class="sub-event-container">
+			<div class="sub-card-wrapper">
+				<canvas class="sub-border-canvas"></canvas>
+				<div class="sub-card-content">
+					<div class="sub-icon-area">
+						<img src="icons/sub-skull.svg" class="sub-skull-icon" alt="Event Icon">
+					</div>
+					<div class="sub-info">
+						<div class="sub-user-row">
+							<div class="sub-user-content">
+								<span id="avatar"></span>
+								<span id="platform"></span>
+								<span id="username"></span>
+								<span id="gift-receiver">
+									<span class="gift-arrow-spacer"><img src="icons/gift-arrow.svg" class="gift-arrow-icon"></span>
+									<span id="receiver-avatar"></span>
+									<span id="receiver-platform"></span>
+									<span id="receiver-username"></span>
+								</span>
+							</div>
+							<span id="timestamp"></span>
+						</div>
+						<span class="sub-description"></span>
+					</div>
+				</div>
+			</div>
+			<div class="sub-comment-wrapper" style="display: none;">
+				<canvas class="sub-comment-border-canvas"></canvas>
+				<div class="sub-comment-content">
+					<span class="sub-comment-text"></span>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<template id="featuredMessageTemplate">
+		<div class="sub-event-container featured-event">
+			<div class="sub-card-wrapper featured-header-wrapper">
+				<canvas class="sub-border-canvas"></canvas>
+				<div class="sub-card-content featured-header-content">
+					<span class="featured-header-text"></span>
+					<span id="timestamp"></span>
+				</div>
+			</div>
+			<div class="sub-comment-wrapper featured-message-wrapper">
+				<canvas class="sub-comment-border-canvas"></canvas>
+				<div class="sub-comment-content featured-message-content">
+					<div class="sub-user-row">
+						<span id="avatar"></span>
+						<span id="platform" class="platform"></span>
+						<span id="username"></span>
+						<span id="badgeList"></span>
+					</div>
+					<div class="featured-message-text"></div>
+				</div>
+			</div>
+		</div>
+	</template>
+
+	<script src="./script.js"></script>
+</body>
+
+</html>
